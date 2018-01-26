@@ -6,6 +6,10 @@
     android:layout_height="match_parent"
     tools:context="com.av.chatz.MainActivity">
 
+    <include
+        android:id="@+id/ma_toolbar"
+        layout="@layout/toolbar_layout"></include>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
