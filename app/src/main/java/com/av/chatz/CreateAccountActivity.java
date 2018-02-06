@@ -1,14 +1,17 @@
 package com.av.chatz;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,17 +26,24 @@ public class CreateAccountActivity extends AppCompatActivity {
     private TextInputLayout tuser, tmail, tpass;
     private Button btnCreate;
     private FirebaseAuth mAuth;
+    private Toolbar mtoolbar;
+    private ProgressDialog mprogress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_account);
 
+        mprogress = new ProgressDialog(this);
+        mtoolbar = findViewById(R.id.caa_toolbar);
         mAuth = FirebaseAuth.getInstance();
         tuser = findViewById(R.id.caa_username);
         tmail = findViewById(R.id.caa_mail);
         tpass = findViewById(R.id.caa_pass);
         btnCreate = findViewById(R.id.caa_create);
+        setSupportActionBar(mtoolbar);
+        getSupportActionBar().setTitle("Register");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         btnCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,13 +51,19 @@ public class CreateAccountActivity extends AppCompatActivity {
                 String username = tuser.getEditText().getText().toString();
                 String mail = tmail.getEditText().getText().toString();
                 String pass = tpass.getEditText().getText().toString();
-                registerUser(username, mail, pass);
+                if (username.length() >= 5 && mail.length() >= 3 && pass.length() >= 5) {
+                    mprogress.setTitle("Registering");
+                    mprogress.setMessage("wait processing request");
+                    mprogress.setCanceledOnTouchOutside(false);
+                    mprogress.show();
+                    registerUser(username, mail, pass);
+                }
             }
         });
     }
 
     private void registerUser(String username, String mail, String pass) {
-        Toast.makeText(this, username+" "+mail+" "+pass, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, username + " " + mail + " " + pass, Toast.LENGTH_SHORT).show();
         mAuth.createUserWithEmailAndPassword(mail, pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -56,16 +72,20 @@ public class CreateAccountActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("", "createUserWithEmail:success");
                             Intent i = new Intent(CreateAccountActivity.this, MainActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(i);
                             finish();
+                            mprogress.dismiss();
 //                            FirebaseUser user = mAuth.getCurrentUser();
 //                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
+                            mprogress.hide();
                             Log.v("--------------", "createUserWithEmail:failure", task.getException());
                             Toast.makeText(CreateAccountActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-//                            updateUI(null);
+//
+// updateUI(null);
                         }
                     }
                 });

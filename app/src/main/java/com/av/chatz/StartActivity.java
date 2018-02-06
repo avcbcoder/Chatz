@@ -8,7 +8,7 @@ import android.widget.Button;
 
 public class StartActivity extends AppCompatActivity {
 
-    private Button start_reg_btn;
+    private Button start_reg_btn,start_log;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +19,14 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(StartActivity.this, CreateAccountActivity.class);
+                startActivity(i);
+            }
+        });
+        start_log=findViewById(R.id.start_log_btn);
+        start_log.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(StartActivity.this, LoginActivity.class);
                 startActivity(i);
             }
         });
