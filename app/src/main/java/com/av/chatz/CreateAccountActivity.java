@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class CreateAccountActivity extends AppCompatActivity {
 
@@ -28,12 +30,14 @@ public class CreateAccountActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Toolbar mtoolbar;
     private ProgressDialog mprogress;
+    DatabaseReference dbref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_account);
 
+        dbref = FirebaseDatabase.getInstance().getReference().child("Users");
         mprogress = new ProgressDialog(this);
         mtoolbar = findViewById(R.id.caa_toolbar);
         mAuth = FirebaseAuth.getInstance();
@@ -62,7 +66,7 @@ public class CreateAccountActivity extends AppCompatActivity {
         });
     }
 
-    private void registerUser(String username, String mail, String pass) {
+    private void registerUser(final String username, final String mail, String pass) {
         Toast.makeText(this, username + " " + mail + " " + pass, Toast.LENGTH_SHORT).show();
         mAuth.createUserWithEmailAndPassword(mail, pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -71,21 +75,19 @@ public class CreateAccountActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("", "createUserWithEmail:success");
+                            String id = dbref.push().getKey();
+                            User user = new User(id + "", mail + "", username, "Hey There", "link");
+                            dbref.child(id).setValue(user);
                             Intent i = new Intent(CreateAccountActivity.this, MainActivity.class);
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(i);
                             finish();
                             mprogress.dismiss();
-//                            FirebaseUser user = mAuth.getCurrentUser();
-//                            updateUI(user);
                         } else {
-                            // If sign in fails, display a message to the user.
                             mprogress.hide();
                             Log.v("--------------", "createUserWithEmail:failure", task.getException());
                             Toast.makeText(CreateAccountActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-//
-// updateUI(null);
                         }
                     }
                 });
