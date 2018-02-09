@@ -4,23 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/prof_bkg"
+    android:background="@color/colorPrimaryDark"
     tools:context="com.av.chatz.AccountSettingActivity">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/prof_image"
         android:layout_width="160dp"
         android:layout_height="160dp"
-        android:layout_marginLeft="115dp"
+        android:layout_marginLeft="108dp"
         android:layout_marginTop="40dp"
         android:src="@drawable/profiledef" />
 
     <TextView
-        android:id="@+id/prof_user"
+        android:id="@+id/prof_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/prof_image"
         android:layout_marginTop="20dp"
         android:gravity="center"
+        android:textColor="@android:color/white"
         android:text="UserName"
         android:textSize="20sp" />
 
@@ -29,8 +32,9 @@
         android:id="@+id/prof_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/prof_user"
+        android:layout_below="@+id/prof_username"
         android:layout_marginTop="30dp"
+        android:textColor="@android:color/white"
         android:gravity="center"
         android:text="status"
         android:textSize="20sp" />
@@ -41,8 +45,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/prof_status"
         android:layout_marginLeft="120dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="85dp"
         android:gravity="center"
+        android:shadowColor="@android:color/black"
+        android:background="@android:color/white"
         android:text="Change Status" />
 
     <Button
@@ -51,7 +57,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/prof_btn_status"
         android:layout_marginLeft="120dp"
+        android:background="@color/colorAccent"
         android:layout_marginTop="20dp"
         android:gravity="center"
+        android:shadowColor="@android:color/white"
         android:text="Change Image" />
 </RelativeLayout>

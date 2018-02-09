@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.menu_logout) {
             FirebaseAuth.getInstance().signOut();
             updateUI();
+        }else if(item.getItemId()==R.id.menu_setting){
+            Intent i=new Intent(this,AccountSettingActivity.class);
+            startActivity(i);
         }
         return true;
     }

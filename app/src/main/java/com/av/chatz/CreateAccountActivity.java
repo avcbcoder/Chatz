@@ -75,9 +75,11 @@ public class CreateAccountActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("", "createUserWithEmail:success");
-                            String id = dbref.push().getKey();
-                            User user = new User(id + "", mail + "", username, "Hey There", "link");
-                            dbref.child(id).setValue(user);
+                            FirebaseUser curr=FirebaseAuth.getInstance().getCurrentUser();
+                            String uid=curr.getUid();
+//                            String id = dbref.push().getKey();
+                            User user = new User(uid + "", mail + "", username, "Hey There", "link");
+                            dbref.child(uid).setValue(user);
                             Intent i = new Intent(CreateAccountActivity.this, MainActivity.class);
                             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(i);

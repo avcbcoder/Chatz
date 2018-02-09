@@ -3,4 +3,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:title="Logout" android:id="@+id/menu_logout"/>
+    <item android:title="Setting" android:id="@+id/menu_setting"/>
 </menu>
