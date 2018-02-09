@@ -1,5 +1,8 @@
 package com.av.chatz;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +17,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,6 +27,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -32,6 +42,7 @@ public class AccountSettingActivity extends AppCompatActivity {
     private DatabaseReference dbrefUser;
     private FirebaseUser currUser;
     TextView tvUser, tvStatus;
+    private StorageReference mstorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +52,8 @@ public class AccountSettingActivity extends AppCompatActivity {
         currUser = FirebaseAuth.getInstance().getCurrentUser();
         String uid = currUser.getUid();
         dbrefUser = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
+
+        mstorage = FirebaseStorage.getInstance().getReference();
 
         tvStatus = findViewById(R.id.prof_username);
         tvUser = findViewById(R.id.prof_status);
@@ -91,13 +104,6 @@ public class AccountSettingActivity extends AppCompatActivity {
             }
         });
 
-        change_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(AccountSettingActivity.this, "Not completed yet", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         change_status.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,8 +111,59 @@ public class AccountSettingActivity extends AppCompatActivity {
             }
         });
 
+        change_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //send intent to pick image
+                Intent galleryIntent = new Intent();
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("image/*");
+                startActivityForResult(Intent.createChooser(galleryIntent, "Select image"), reqCodeForImageChoosing);
+                /*
+                CropImage.activity()
+                        .setGuidelines(CropImageView.Guidelines.ON)
+                        .start(AccountSettingActivity.this);*/
+
+            }
+        });
+
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        //image picking successfull then start the intent to cropimage Activity
+        if (requestCode == reqCodeForImageChoosing && resultCode == RESULT_OK) {
+            Uri imageUri = data.getData();
+            CropImage.activity(imageUri)
+                    .setAspectRatio(1, 1)
+                    .start(this);
+        }
+
+        //if image crop is done successfully then upload to firebase
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+                StorageReference filePath = mstorage.child("profile_images").child(currUser.getUid() + ".jpg");
+                filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(AccountSettingActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(AccountSettingActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
+        }
+    }
+
+    public static final int reqCodeForImageChoosing = 40;
 
 }
