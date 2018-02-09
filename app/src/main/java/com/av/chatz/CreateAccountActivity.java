@@ -55,7 +55,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                 String username = tuser.getEditText().getText().toString();
                 String mail = tmail.getEditText().getText().toString();
                 String pass = tpass.getEditText().getText().toString();
-                if (username.length() >= 5 && mail.length() >= 3 && pass.length() >= 5) {
+                if (username.length() >= 1 && mail.length() >= 3 && pass.length() >= 1) {
                     mprogress.setTitle("Registering");
                     mprogress.setMessage("wait processing request");
                     mprogress.setCanceledOnTouchOutside(false);
@@ -75,9 +75,9 @@ public class CreateAccountActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("", "createUserWithEmail:success");
-                            FirebaseUser curr=FirebaseAuth.getInstance().getCurrentUser();
-                            String uid=curr.getUid();
-//                            String id = dbref.push().getKey();
+                            FirebaseUser curr = FirebaseAuth.getInstance().getCurrentUser();
+                            String uid = curr.getUid();
+                            // String id = dbref.push().getKey();
                             User user = new User(uid + "", mail + "", username, "Hey There", "link");
                             dbref.child(uid).setValue(user);
                             Intent i = new Intent(CreateAccountActivity.this, MainActivity.class);
@@ -88,8 +88,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                         } else {
                             mprogress.hide();
                             Log.v("--------------", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(CreateAccountActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateAccountActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

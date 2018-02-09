@@ -1,5 +1,6 @@
 package com.av.chatz;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -30,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -43,6 +45,7 @@ public class AccountSettingActivity extends AppCompatActivity {
     private FirebaseUser currUser;
     TextView tvUser, tvStatus;
     private StorageReference mstorage;
+    private ProgressDialog mprogress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class AccountSettingActivity extends AppCompatActivity {
         dbrefUser = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
 
         mstorage = FirebaseStorage.getInstance().getReference();
+
 
         tvStatus = findViewById(R.id.prof_username);
         tvUser = findViewById(R.id.prof_status);
@@ -68,6 +72,8 @@ public class AccountSettingActivity extends AppCompatActivity {
                 User u = dataSnapshot.getValue(User.class);
                 tvUser.setText(u.username);
                 tvStatus.setText(u.status);
+                if(u.image_link.length()>5)
+                Picasso.with(AccountSettingActivity.this).load(u.image_link).into(profile_image);
             }
 
             @Override
@@ -146,15 +152,41 @@ public class AccountSettingActivity extends AppCompatActivity {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
+
+                mprogress = new ProgressDialog(AccountSettingActivity.this);
+                mprogress.setTitle("Uploading Image");
+                mprogress.setMessage("Please wait till the upload is finish");
+                mprogress.setCanceledOnTouchOutside(false);
+                mprogress.show();
+
                 Uri resultUri = result.getUri();
                 StorageReference filePath = mstorage.child("profile_images").child(currUser.getUid() + ".jpg");
+                //upload file to that database refrance
                 filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
+                            String download_url = task.getResult().getDownloadUrl().toString();
+                            Log.i("8****************",download_url);
+                            //set image link of current user
+                            dbrefUser.child("image_link").setValue(download_url + "");
+//                            dbrefUser.child("image_link").setValue(download_url).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                @Override
+//                                public void onComplete(@NonNull Task<Void> task) {
+//                                    if (task.isSuccessful()) {
+//                                        Toast.makeText(AccountSettingActivity.this, "uploaded to firebase", Toast.LENGTH_SHORT).show();
+//                                        mprogress.dismiss();
+//                                    } else {
+//                                        Toast.makeText(AccountSettingActivity.this, "faild to upload to firebase", Toast.LENGTH_SHORT).show();
+//                                        mprogress.dismiss();
+//                                    }
+//                                }
+//                            });
                             Toast.makeText(AccountSettingActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                            mprogress.dismiss();
                         } else {
                             Toast.makeText(AccountSettingActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+                            mprogress.dismiss();
                         }
                     }
                 });
